@@ -29,7 +29,8 @@ DividendDistributor.sol >> Line 20
     address WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
     IUniswapV2Router02 public router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);```
 
-Step 3) open truffle console with the --network flag to specify which network to deploy contracts on example; ```npx truffle console --network polygon```
+Step 3) open truffle console with the --network flag to specify which network to deploy contracts on example; 
+```npx truffle console --network polygon```
 
 Step 4) compile, and/or migrate. So we need to type in to truffle console ```compile``` to compile smart contracts, and then ```migrate``` to deploy /migrations to the --network selected.
 
