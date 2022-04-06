@@ -1,0 +1,24 @@
+{
+  "name": "iCash",
+  "version": "1.0.0",
+  "description": "Experimental cryptocurrency for educational purposes.",
+  "main": "truffle-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.4.2",
+    "@truffle/hdwallet-provider": "^1.5.1",
+    "chai": "^4.3.4",
+    "hardhat": "^2.8.3",
+    "solidity-coverage": "^0.7.18",
+    "truffle": "5.5.2"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.4.2",
+    "truffle-plugin-verify": "^0.5.21"
+  }
+}
