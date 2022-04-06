@@ -21,15 +21,15 @@ This was tested on Polygon, so the contracts for USDT and WETH are set to USDT(P
 The router below is Quickswap. In Main net ethereum for example, one would change these values to deploy 
 
 iCash.sol >> Line 8
-    ```address USDT = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
+    address USDT = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
     address public WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
-    ```
+    
     
 DividendDistributor.sol >> Line 20
-    ```IERC20 USDT = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
+    IERC20 USDT = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
     address WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
     IUniswapV2Router02 public router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
-    ```
+    
 
 Step 3) open truffle console with the --network flag to specify which network to deploy contracts on example; 
 ```npx truffle console --network polygon```
