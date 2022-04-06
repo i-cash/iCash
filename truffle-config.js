@@ -48,6 +48,17 @@ module.exports = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    ethereum: {
+      host : "https://mainnet.infura.io/v3/",
+      port: 8545,
+      network_id: 1,
+      chain_id: 1,
+      provider: () =>
+        new HDWalletProvider({
+          privateKeys: ethereum_privateKeys,
+          providerOrUrl: "https://mainnet.infura.io/v3/",
+      }),
+    },
     goerli: {
       host : "https://goerli.infura.io/v3/",
       port: 8545,
