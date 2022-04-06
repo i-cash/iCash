@@ -1,4 +1,4 @@
-# iCash - Experimental smart contracts for educational purposes. 
+# iCash / iSociety - Experimental smart contracts for educational purposes. 
 Use at your own risk, I am not the original authors nor the bearer of the rights to this technology. 
 It's been provided to me for educational purposes, during research and development. 
 The code is live on Main Polygon for testing. Beware there are several contracts with the same names and not all are valid instances or representations of the iCash smart contracts experiment(s).
