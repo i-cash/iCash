@@ -10,7 +10,7 @@ If you're interested in collaborating and learning about cryptocurrency developm
 
 Steps to redeploy are below. Will update more later if necessary.
 
-##Depends:
+## Depends:
 NPM / Yarn & NodeJS. 
 
 Step 1) ```yarn``` or ```npm i``` 
@@ -36,6 +36,6 @@ Step 4) compile, and/or migrate. So we need to type in to truffle console ```com
 
 Step 5) we are still learning, what does this button do?....
 
-##Disclaimer
+# Disclaimer
 
 All claims, content, designs, algorithms, and performance measurements described in this project are done with good faith efforts. It is up to the reader to check and validate their accuracy and truthfulness. Furthermore, nothing in this project constitutes a solicitation for investment. For educational purposes. Join the movement! https://t.me/cryptocurrencydevs
