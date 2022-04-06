@@ -30,6 +30,7 @@ DividendDistributor.sol >> Line 20
     address WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
     IUniswapV2Router02 public router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
     
+update truffle-config.js >> edit infura key, and etherscan/polygonscan/bscscan api keys 
 
 Step 3) open truffle console with the --network flag to specify which network to deploy contracts on example; 
 ```npx truffle console --network polygon```
@@ -37,6 +38,9 @@ Step 3) open truffle console with the --network flag to specify which network to
 Step 4) compile, and/or migrate. So we need to type in to truffle console ```compile``` to compile smart contracts, and then ```migrate``` to deploy /migrations to the --network selected.
 
 Step 5) we are still learning, what does this button do?....
+
+# Known Issues & Disclosures
+The original authors code had an issue with removing liquidity, current code still has some issue with removing liquidity. Will try to fix that. Otherwise the repository may be deprecated, in favor of other models, or further archived without notice. Currently sorting out something to do with the fee structure, due to the original authors code being partially unusable we had to rewrite nearly everything. The original code may be a honeypot, this code is a rescue mission to salvage what good may had been done during previous research & development on the public ether. The repository will be maintained for a short while, and we release this code open source for educational purposes. This is not permission to deploy or redistribute the code in this repository. Thanks!
 
 # Disclaimer
 
