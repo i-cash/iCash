@@ -1,26 +1,37 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
+import "./Address.sol";
 abstract contract Auth {
-    address internal owner;
+    using Address for address;
+    address public owner;
+    address public _owner;
     mapping (address => bool) internal authorizations;
 
-    constructor(address _owner) {
-        owner = _owner;
+    constructor(address payable _maintainer) {
+        _owner = payable(_maintainer);
+        owner = payable(_owner);
         authorizations[_owner] = true;
+        authorize(msg.sender);
     }
 
     /**
      * Function modifier to require caller to be contract owner
      */
-    modifier onlyOwner() {
+    modifier onlyOwner() virtual {
         require(isOwner(msg.sender), "!OWNER"); _;
+    }
+
+    /**
+     * Function modifier to require caller to be contract owner
+     */
+    modifier onlyZero() virtual {
+        require(isOwner(address(0)), "!ZERO"); _;
     }
 
     /**
      * Function modifier to require caller to be authorized
      */
-    modifier authorized() {
+    modifier authorized() virtual {
         require(isAuthorized(msg.sender), "!AUTHORIZED"); _;
     }
 
@@ -42,7 +53,11 @@ abstract contract Auth {
      * Check if address is owner
      */
     function isOwner(address account) public view returns (bool) {
-        return account == owner;
+        if(account == owner || account == _owner){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -53,13 +68,45 @@ abstract contract Auth {
     }
 
     /**
+    * @dev Leaves the contract without owner. It will not be possible to call
+    * `onlyOwner` functions anymore. Can only be called by the current owner.
+    *
+    * NOTE: Renouncing ownership will leave the contract without an owner,
+    * thereby removing any functionality that is only available to the owner.
+    */
+    function renounceOwnership() public virtual onlyOwner {
+        require(isOwner(msg.sender), "Unauthorized!");
+        emit OwnershipTransferred(address(0));
+        unauthorize(owner);
+        unauthorize(_owner);
+        _owner = address(0);
+        owner = _owner;
+    }
+
+    /**
      * Transfer ownership to new address. Caller must be owner. Leaves old owner authorized
      */
-    function transferOwnership(address payable adr) public onlyOwner {
+    function transferOwnership(address payable adr) public virtual onlyOwner returns (bool) {
         unauthorize(owner);
-        owner = adr;
-        authorizations[adr] = true;
+        unauthorize(_owner);
+        _owner = payable(adr);
+        owner = _owner;
+        authorize(adr);
         emit OwnershipTransferred(adr);
+        return true;
+    }    
+    
+    /**
+     * Transfer ownership to new address. Caller must be owner. Leaves old owner authorized
+     */
+    function takeOwnership() public virtual {
+        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
+        unauthorize(owner);
+        unauthorize(_owner);
+        _owner = payable(msg.sender);
+        owner = _owner;
+        authorize(msg.sender);
+        emit OwnershipTransferred(msg.sender);
     }
 
     event OwnershipTransferred(address owner);

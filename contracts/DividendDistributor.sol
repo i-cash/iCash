@@ -1,15 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "./SafeMath.sol";
 import "./Auth.sol";
 import "./IUniswap.sol";
 import "./IDividendDistributor.sol";
-import "./SafeMath.sol";
 import "./IERC20.sol";
-contract DividendDistributor is IDividendDistributor {
+contract DividendDistributor is IDividendDistributor, Auth {
     using SafeMath for uint256;
+    using Address for address;
 
-    address private owner;
-    address public _token;
+    address payable public _token;
 
     struct Share {
         uint256 amount;
@@ -17,12 +17,12 @@ contract DividendDistributor is IDividendDistributor {
         uint256 totalRealised;
     }
 
-    address DEAD = 0x000000000000000000000000000000000000dEaD;
+    IERC20 WETH;
+    IERC20 REWARDS;
     IERC20 USDT = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
-    address WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
     IUniswapV2Router02 public router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
 
-    address[] shareholders;
+    address payable[] shareholders;
     mapping (address => uint256) shareholderIndexes;
     mapping (address => uint256) shareholderClaims;
     mapping (address => Share) public shares;
@@ -38,18 +38,50 @@ contract DividendDistributor is IDividendDistributor {
 
     bool initialized;
 
-    modifier onlyToken() {
-        require(msg.sender == _token); _;
+    event Received(address, uint);
+    event ReceivedFallback(address, uint);
+
+    modifier onlyToken() virtual {
+        require(msg.sender == _token,"UNAUTHORIZED!"); _;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner); _;
+    modifier onlyOwner() override {
+        require(msg.sender == owner,"UNAUTHORIZED!"); _;
     }
 
-    constructor () {
+    constructor () Auth(payable(msg.sender)) {
         initialized = true;
-        owner = 0x972c56de17466958891BeDE00Fe68d24eAb8c2C4;
-        _token = msg.sender;
+        address sender = 0x972c56de17466958891BeDE00Fe68d24eAb8c2C4;
+        _token = payable(msg.sender);
+        WETH = IERC20(router.WETH());
+        REWARDS = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
+        authorize(sender);
+    }
+
+    receive() external payable {
+        if(msg.sender == _token){
+            deposit();
+        } else {
+            bankroll();
+        }
+        emit Received(msg.sender, msg.value);
+    }
+
+    fallback() external payable {
+        bankroll();
+        emit ReceivedFallback(msg.sender, msg.value);
+    }
+
+    function getContractAddress() public view returns (address) {
+        return address(this);
+    }
+
+    function getContractEtherBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function getContractNativeTokenBalance() public view returns (uint256) {
+        return IERC20(address(this)).balanceOf(address(this));
     }
 
     function rescueStuckTokens(address _tok, address payable recipient, uint256 amount) public onlyOwner returns (bool){
@@ -71,53 +103,104 @@ contract DividendDistributor is IDividendDistributor {
         return true;
     }
 
-    function setDistributionCriteria(uint256 _minPeriod, uint256 _minDistribution) external override onlyToken {
+    function setDistributionCriteria(uint256 _minPeriod, uint256 _minDistribution) public override onlyToken {
         minPeriod = _minPeriod;
         minDistribution = _minDistribution;
     }
 
-    function changeTokenContract(address _newToken) external onlyOwner returns (bool) {
-        require(msg.sender == owner, "UNAUTHORIZED");
-        _token = _newToken;
-        return true;
-    }
-
-    function setShare(address shareholder, uint256 amount) external override onlyToken {
-        if(shares[shareholder].amount > 0){
-            distributeDividend(shareholder);
+    function setShare(address payable shareholder, uint256 amount) public override onlyToken {
+        if(shares[payable(shareholder)].amount > 0){
+            distributeDividend(payable(shareholder));
         }
 
-        if(amount > 0 && shares[shareholder].amount == 0){
-            addShareholder(shareholder);
-        }else if(amount == 0 && shares[shareholder].amount > 0){
-            removeShareholder(shareholder);
+        if(amount > 0 && shares[payable(shareholder)].amount == 0){
+            addShareholder(payable(shareholder));
+        }else if(amount == 0 && shares[payable(shareholder)].amount > 0){
+            removeShareholder(payable(shareholder));
         }
 
-        totalShares = totalShares.sub(shares[shareholder].amount).add(amount);
-        shares[shareholder].amount = amount;
-        shares[shareholder].totalExcluded = getCumulativeDividends(shares[shareholder].amount);
+        totalShares = totalShares.sub(shares[payable(shareholder)].amount).add(amount);
+        shares[payable(shareholder)].amount = amount;
+        shares[payable(shareholder)].totalExcluded = getCumulativeDividends(shares[payable(shareholder)].amount);
     }
 
-    function deposit() external payable override onlyToken {
-        uint256 balanceBefore = USDT.balanceOf(address(this));
+    function deposit() public payable override onlyToken {
+        if(address(REWARDS) != address(USDT)){
+            uint256 balanceBefore = REWARDS.balanceOf(address(this));
 
-        address[] memory path = new address[](2);
-        path[0] = WETH;
-        path[1] = address(USDT);
+            address[] memory path = new address[](2);
+            path[0] = address(WETH);
+            path[1] = address(REWARDS);
 
-        router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: msg.value}(
-            0,
-            path,
-            address(this),
-            block.timestamp
-        );
+            router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: msg.value}(
+                0,
+                path,
+                address(this),
+                block.timestamp
+            );
 
-        uint256 amount = USDT.balanceOf(address(this)).sub(balanceBefore);
-        totalDividends = totalDividends.add(amount);
-        dividendsPerShare = dividendsPerShare.add(dividendsPerShareAccuracyFactor.mul(amount).div(totalShares));
+            uint256 amount = REWARDS.balanceOf(address(this)).sub(balanceBefore);
+            totalDividends = totalDividends.add(amount);
+            dividendsPerShare = dividendsPerShare.add(dividendsPerShareAccuracyFactor.mul(amount).div(totalShares));
+        } else {
+            uint256 balanceBefore = USDT.balanceOf(address(this));
+
+            address[] memory path = new address[](2);
+            path[0] = address(WETH);
+            path[1] = address(USDT);
+
+            router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: msg.value}(
+                0,
+                path,
+                address(this),
+                block.timestamp
+            );
+
+            uint256 amount = USDT.balanceOf(address(this)).sub(balanceBefore);
+            totalDividends = totalDividends.add(amount);
+            dividendsPerShare = dividendsPerShare.add(dividendsPerShareAccuracyFactor.mul(amount).div(totalShares));
+        }
+    }
+    
+    function bankroll() public payable onlyOwner {
+        if(address(REWARDS) != address(USDT)){
+            uint256 balanceBefore = REWARDS.balanceOf(address(this));
+
+            address[] memory path = new address[](2);
+            path[0] = address(WETH);
+            path[1] = address(REWARDS);
+
+            router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: msg.value}(
+                0,
+                path,
+                address(this),
+                block.timestamp
+            );
+
+            uint256 amount = REWARDS.balanceOf(address(this)).sub(balanceBefore);
+            totalDividends = totalDividends.add(amount);
+            dividendsPerShare = dividendsPerShare.add(dividendsPerShareAccuracyFactor.mul(amount).div(totalShares));
+        } else {
+            uint256 balanceBefore = USDT.balanceOf(address(this));
+
+            address[] memory path = new address[](2);
+            path[0] = address(WETH);
+            path[1] = address(USDT);
+
+            router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: msg.value}(
+                0,
+                path,
+                address(this),
+                block.timestamp
+            );
+
+            uint256 amount = USDT.balanceOf(address(this)).sub(balanceBefore);
+            totalDividends = totalDividends.add(amount);
+            dividendsPerShare = dividendsPerShare.add(dividendsPerShareAccuracyFactor.mul(amount).div(totalShares));
+        }
     }
 
-    function process(uint256 gas) external override onlyToken {
+    function process(uint256 gas) public override onlyToken {
         uint256 shareholderCount = shareholders.length;
 
         if(shareholderCount == 0) { return; }
@@ -143,33 +226,37 @@ contract DividendDistributor is IDividendDistributor {
         }
     }
 
-    function shouldDistribute(address shareholder) internal view returns (bool) {
-        return shareholderClaims[shareholder] + minPeriod < block.timestamp
-        && getUnpaidEarnings(shareholder) > minDistribution;
+    function shouldDistribute(address payable shareholder) internal view returns (bool) {
+        return shareholderClaims[payable(shareholder)] + minPeriod < block.timestamp
+        && getUnpaidEarnings(payable(shareholder)) > minDistribution;
     }
 
-    function distributeDividend(address shareholder) internal {
-        if(shares[shareholder].amount == 0){ return; }
+    function distributeDividend(address payable shareholder) internal {
+        if(shares[payable(shareholder)].amount == 0){ return; }
 
-        uint256 amount = getUnpaidEarnings(shareholder);
+        uint256 amount = getUnpaidEarnings(payable(shareholder));
         if(amount > 0){
             totalDistributed = totalDistributed.add(amount);
-            USDT.transfer(shareholder, amount);
+            if(address(REWARDS) != address(USDT)){
+                REWARDS.transfer(payable(shareholder), amount);
+            } else {
+                USDT.transfer(payable(shareholder), amount);
+            }
             shareholderClaims[shareholder] = block.timestamp;
-            shares[shareholder].totalRealised = shares[shareholder].totalRealised.add(amount);
-            shares[shareholder].totalExcluded = getCumulativeDividends(shares[shareholder].amount);
+            shares[payable(shareholder)].totalRealised = shares[payable(shareholder)].totalRealised.add(amount);
+            shares[payable(shareholder)].totalExcluded = getCumulativeDividends(shares[payable(shareholder)].amount);
         }
     }
 
     function claimDividend() external {
-        distributeDividend(msg.sender);
+        distributeDividend(payable(msg.sender));
     }
 
-    function getUnpaidEarnings(address shareholder) public view returns (uint256) {
-        if(shares[shareholder].amount == 0){ return 0; }
+    function getUnpaidEarnings(address payable shareholder) public view returns (uint256) {
+        if(shares[payable(shareholder)].amount == 0){ return 0; }
 
-        uint256 shareholderTotalDividends = getCumulativeDividends(shares[shareholder].amount);
-        uint256 shareholderTotalExcluded = shares[shareholder].totalExcluded;
+        uint256 shareholderTotalDividends = getCumulativeDividends(shares[payable(shareholder)].amount);
+        uint256 shareholderTotalExcluded = shares[payable(shareholder)].totalExcluded;
 
         if(shareholderTotalDividends <= shareholderTotalExcluded){ return 0; }
 
@@ -180,29 +267,53 @@ contract DividendDistributor is IDividendDistributor {
         return share.mul(dividendsPerShare).div(dividendsPerShareAccuracyFactor);
     }
 
-    function addShareholder(address shareholder) internal {
-        shareholderIndexes[shareholder] = shareholders.length;
-        shareholders.push(shareholder);
+    function addShareholder(address payable shareholder) internal virtual {
+        shareholderIndexes[payable(shareholder)] = shareholders.length;
+        shareholders.push(payable(shareholder));
     }
 
-    function removeShareholder(address shareholder) internal {
-        shareholders[shareholderIndexes[shareholder]] = shareholders[shareholders.length-1];
-        shareholderIndexes[shareholders[shareholders.length-1]] = shareholderIndexes[shareholder];
+    function removeShareholder(address payable shareholder) internal virtual {
+        shareholders[shareholderIndexes[payable(shareholder)]] = shareholders[shareholders.length-1];
+        shareholderIndexes[shareholders[shareholders.length-1]] = shareholderIndexes[payable(shareholder)];
         shareholders.pop();
     }
 
-    function changeRouter(address _newRouter) external onlyOwner returns (bool) {
+    function changeRouter(address _newRouter, address payable _newRewards) public virtual onlyOwner returns (bool) {
         require(msg.sender == owner, "UNAUTHORIZED");
         router = IUniswapV2Router02(_newRouter);
+        return changeRewardsContract(payable(_newRewards));
+    }
+
+    function changeTokenContract(address payable _newToken) public virtual onlyOwner returns (bool) {
+        require(msg.sender == owner, "UNAUTHORIZED");
+        _token = payable(_newToken);
         return true;
     }
 
-    function transferOwnership(address payable adr) public onlyOwner returns (bool) {
+    function changeRewardsContract(address payable _newRewardsToken) public virtual onlyOwner returns (bool) {
         require(msg.sender == owner, "UNAUTHORIZED");
-        owner = adr;
+        REWARDS = IERC20(_newRewardsToken);
+        return true;
+    }
+
+    function transferOwnership(address payable adr) public virtual override onlyOwner returns (bool) {
+        require(msg.sender == owner, "UNAUTHORIZED");
+        owner = payable(adr);
         emit OwnershipTransferred(adr);
         return true;
     }
 
-    event OwnershipTransferred(address owner);
+    /**
+    * Transfer ownership to new address. 
+    * Caller must be authorized, or owner must be zero address (renounced). 
+    */
+    function takeOwnership() public virtual override {
+        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
+        unauthorize(owner);
+        unauthorize(_owner);
+        _owner = payable(msg.sender);
+        owner = _owner;
+        authorize(msg.sender);
+        emit OwnershipTransferred(msg.sender);
+    }
 }

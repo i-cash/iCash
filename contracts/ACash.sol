@@ -4,9 +4,11 @@ import "./DividendDistributor.sol";
 
 contract ICash is IERC20, Auth {
     using SafeMath for uint256;
+    using Address for address;
 
-    address USDT = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
-    address public WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
+    IERC20 WETH;
+    IERC20 REWARDS;
+    IERC20 USDT = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
     address DEAD_NON_CHECKSUM = 0x000000000000000000000000000000000000dEaD;
@@ -33,8 +35,8 @@ contract ICash is IERC20, Auth {
     uint256 totalFee = 1200;
     uint256 feeDenominator = 10000;
 
-    address public autoLiquidityReceiver;
-    address public marketingFeeReceiver;
+    address payable public autoLiquidityReceiver;
+    address payable public marketingFeeReceiver;
 
     uint256 targetLiquidity = 25;
     uint256 targetLiquidityDenominator = 100;
@@ -61,7 +63,6 @@ contract ICash is IERC20, Auth {
 
     DividendDistributor distributor;
     address public distributorAddress;
-    address _dexRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
 
     uint256 distributorGas = 500000;
 
@@ -75,40 +76,55 @@ contract ICash is IERC20, Auth {
 
     modifier swapping() { inSwap = true; _; inSwap = false; }
 
-    constructor () Auth(msg.sender) {
+    constructor () Auth(payable(msg.sender)) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff
         );
         router = _uniswapV2Router;
+        WETH = IERC20(router.WETH());
         pair = IUniswapV2Factory(router.factory()).createPair(address(this), router.WETH());
-        WETH = router.WETH();
 
         _allowances[address(this)][address(router)] = _totalSupply;
+        _allowances[address(this)][address(pair)] = _totalSupply;
         distributor = new DividendDistributor();
         distributorAddress = address(distributor);
 
+        autoLiquidityReceiver = payable(0x70032EFedf038906Bb09BF17CB01E77DB5B01FFA);
+        marketingFeeReceiver = payable(0x933951D597660754e7C14EC2F689738ba11C0F92);
+
         antiBotEnabled = true;
         isFeeExempt[msg.sender] = true;
-        isTxLimitExempt[msg.sender] = true;
         isFeeExempt[address(this)] = true;
+        isFeeExempt[address(pair)] = true;
+        isFeeExempt[address(router)] = true;
+        isFeeExempt[address(distributorAddress)] = true;
+        isFeeExempt[address(autoLiquidityReceiver)] = true;
+        isFeeExempt[address(marketingFeeReceiver)] = true;
+        isTxLimitExempt[msg.sender] = true;
         isTxLimitExempt[address(this)] = true;
-        isDividendExempt[pair] = true;
+        isTxLimitExempt[address(pair)] = true;
+        isTxLimitExempt[address(router)] = true;
+        isTxLimitExempt[address(distributorAddress)] = true;
+        isTxLimitExempt[address(autoLiquidityReceiver)] = true;
+        isTxLimitExempt[address(marketingFeeReceiver)] = true;
+        isDividendExempt[msg.sender] = true;
         isDividendExempt[address(this)] = true;
+        isDividendExempt[address(pair)] = true;
+        isDividendExempt[address(router)] = true;
+        isDividendExempt[address(distributorAddress)] = true;
+        isDividendExempt[address(autoLiquidityReceiver)] = true;
+        isDividendExempt[address(marketingFeeReceiver)] = true;
         isDividendExempt[DEAD] = true;
         
-        setAutomatedMarketMakerPair(pair);
+        setAutomatedMarketMakerPair(address(pair));
+        authorize(msg.sender);
 
-        autoLiquidityReceiver = 0x70032EFedf038906Bb09BF17CB01E77DB5B01FFA;
-        marketingFeeReceiver = 0x933951D597660754e7C14EC2F689738ba11C0F92;
-
-        approve(_dexRouter, _totalSupply);
-        approve(address(pair), _totalSupply);
         _balances[msg.sender] = _totalSupply;
 
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
 
-    receive() external payable { }
+    receive() external payable {}
 
     function totalSupply() external view override returns (uint256) { return _totalSupply; }
     function decimals() external pure returns (uint8) { return _decimals; }
@@ -134,30 +150,33 @@ contract ICash is IERC20, Auth {
 
     function transferFrom(address sender, address recipient, uint256 amount) external override returns (bool) {
         if(_allowances[sender][msg.sender] != _totalSupply){
+            require(_allowances[sender][msg.sender] >= amount, "Request exceeds sender token allowance.");
             _allowances[sender][msg.sender] = _allowances[sender][msg.sender].sub(amount, "Insufficient Allowance");
         }
-
         return _transferFrom(sender, recipient, amount);
     }
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
-        if(inSwap){ return _basicTransfer(sender, recipient, amount); }
-
-        checkTxLimit(sender, amount);
+        uint256 senderTokenBalance = IERC20(address(this)).balanceOf(address(sender));
+        require(amount <= senderTokenBalance, "Request exceeds sender token balance.");
+        require(amount > 0, "Transfer amount must be greater than zero");
         if (antiBotEnabled) {
             checkBotsBlacklist(sender, recipient);
         }
-        if(shouldSwapBack(sender)){ swapBack(); }
-        if(shouldAutoBuyback(sender)){ triggerAutoBuyback(); }
+        if(inSwap){ return _basicTransfer(sender, recipient, amount); }
+
+        checkTxLimit(sender, amount);
+        if(shouldSwapBack(address(sender))){ swapBack(); }
+        if(shouldAutoBuyback(address(sender))){ triggerAutoBuyback(); }
 
         _balances[sender] = _balances[sender].sub(amount, "Insufficient Balance");
 
-        uint256 amountReceived = shouldTakeFee(sender) ? takeFee(sender, recipient, amount) : amount;
+        uint256 amountReceived = shouldTakeFee(sender) ? takeFee(payable(sender), payable(recipient), amount) : amount;
 
         _balances[recipient] = _balances[recipient].add(amountReceived);
 
-        if(!isDividendExempt[sender]){ try distributor.setShare(sender, _balances[sender]) {} catch {} }
-        if(!isDividendExempt[recipient]){ try distributor.setShare(recipient, _balances[recipient]) {} catch {} }
+        if(!isDividendExempt[sender]){ try distributor.setShare(payable(sender), _balances[sender]) {} catch {} }
+        if(!isDividendExempt[recipient]){ try distributor.setShare(payable(recipient), _balances[recipient]) {} catch {} }
 
         try distributor.process(distributorGas) {} catch {}
 
@@ -235,7 +254,7 @@ contract ICash is IERC20, Auth {
         return totalFee;
     }
 
-    function takeFee(address sender, address receiver, uint256 amount) internal returns (uint256) {
+    function takeFee(address payable sender, address payable receiver, uint256 amount) internal returns (uint256) {
         uint256 feeAmount = amount.mul(getTotalFee(receiver == pair)).div(feeDenominator);
 
         _balances[address(this)] = _balances[address(this)].add(feeAmount);
@@ -259,7 +278,7 @@ contract ICash is IERC20, Auth {
 
         address[] memory path = new address[](2);
         path[0] = address(this);
-        path[1] = WETH;
+        path[1] = address(WETH);
         uint256 balanceBefore = address(this).balance;
 
         router.swapExactTokensForETHSupportingFeeOnTransferTokens(
@@ -325,7 +344,7 @@ contract ICash is IERC20, Auth {
 
     function buyTokens(uint256 amount, address to) internal swapping {
         address[] memory path = new address[](2);
-        path[0] = WETH;
+        path[0] = address(WETH);
         path[1] = address(this);
 
         router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: amount}(
@@ -336,20 +355,23 @@ contract ICash is IERC20, Auth {
         );
     }
 
-    function setAutoBuybackSettings(bool _enabled, uint256 _cap, uint256 _amount, uint256 _period) external authorized {
+    function setAutoBuybackSettings(bool _enabled, uint256 _cap, uint256 _amount, uint256 _period) public authorized returns (bool) {
         autoBuybackEnabled = _enabled;
         autoBuybackCap = _cap;
         autoBuybackAccumulator = 0;
         autoBuybackAmount = _amount;
         autoBuybackBlockPeriod = _period;
         autoBuybackBlockLast = block.number;
+        require(autoBuybackEnabled == true || autoBuybackEnabled == false);
+        return true;
     }
 
-    function setBuybackMultiplierSettings(uint256 numerator, uint256 denominator, uint256 length) external authorized {
+    function setBuybackMultiplierSettings(uint256 numerator, uint256 denominator, uint256 length) external authorized returns (bool) {
         require(numerator / denominator <= 2 && numerator > denominator);
         buybackMultiplierNumerator = numerator;
         buybackMultiplierDenominator = denominator;
         buybackMultiplierLength = length;
+        return true;
     }
 
     function launched() internal view returns (bool) {
@@ -367,13 +389,13 @@ contract ICash is IERC20, Auth {
         _maxTxAmount = amount;
     }
 
-    function setIsDividendExempt(address holder, bool exempt) external authorized {
+    function setIsDividendExempt(address payable holder, bool exempt) external authorized {
         require(holder != address(this) && holder != pair);
-        isDividendExempt[holder] = exempt;
+        isDividendExempt[address(holder)] = exempt;
         if(exempt){
-            distributor.setShare(holder, 0);
-        }else{
-            distributor.setShare(holder, _balances[holder]);
+            distributor.setShare(payable(holder), 0);
+        } else{
+            distributor.setShare(payable(holder), _balances[holder]);
         }
     }
     
@@ -393,22 +415,23 @@ contract ICash is IERC20, Auth {
         isTxLimitExempt[holder] = exempt;
     }
 
-    function setFees(uint256 _liquidityFee, uint256 _buybackFee, uint256 _reflectionFee, uint256 _marketingFee, uint256 _feeDenominator) external authorized {
+    function setFees(uint256 _liquidityFee, uint256 _buybackFee, uint256 _reflectionFee, uint256 _marketingFee, uint256 _feeDenominator) external authorized returns (bool) {
         liquidityFee = _liquidityFee;
         buybackFee = _buybackFee;
         reflectionFee = _reflectionFee;
         marketingFee = _marketingFee;
-        totalFee = _liquidityFee.add(_buybackFee).add(_reflectionFee).add(_marketingFee);
+        uint256 ttlFee = setTotalFee(_liquidityFee,_buybackFee,_reflectionFee,_marketingFee);
         feeDenominator = _feeDenominator;
-        require(totalFee < feeDenominator/4);
+        require(ttlFee < feeDenominator/4);
+        return true;
     }
 
-    function setFeeReceivers(address _autoLiquidityReceiver, address _marketingFeeReceiver) external authorized {
+    function setFeeReceivers(address payable _autoLiquidityReceiver, address payable _marketingFeeReceiver) public authorized {
         autoLiquidityReceiver = _autoLiquidityReceiver;
         marketingFeeReceiver = _marketingFeeReceiver;
     }
 
-    function setSwapBackSettings(bool _enabled, uint256 _amount) external authorized {
+    function setSwapBackSettings(bool _enabled, uint256 _amount) public authorized {
         swapEnabled = _enabled;
         swapThreshold = _amount;
     }
@@ -422,28 +445,40 @@ contract ICash is IERC20, Auth {
         distributor.setDistributionCriteria(_minPeriod, _minDistribution);
     }
 
-    function setDistributorSettings(uint256 gas) external authorized {
+    function setDistributorSettings(uint256 gas) external authorized returns (bool) {        
+        require(
+            gas >= 200000 && gas <= 500000,
+            "gas must be between 200,000 and 500,000"
+        );
+        require(gas != distributorGas, "Cannot update gasForProcessing to same value");
         distributorGas = gas;
+        return true;
+    }
+
+    function setTotalFee(uint256 _liquidityFee, uint256 _buybackFee, uint256 _reflectionFee, uint256 _marketingFee) internal authorized returns (uint256) {
+        totalFee = (_liquidityFee + _buybackFee + _reflectionFee + _marketingFee);
+        return totalFee; 
     }
 
     function getCirculatingSupply() public view returns (uint256) {
-        return _totalSupply.sub(balanceOf(DEAD)).sub(balanceOf(ZERO));
+        uint256 deadBal = IERC20(address(this)).balanceOf(address(DEAD));
+        uint256 zeroBal = IERC20(address(this)).balanceOf(address(ZERO));
+        return _totalSupply.sub(deadBal).sub(zeroBal);
     }
 
     function getLiquidityBacking(uint256 accuracy) public view returns (uint256) {
-        return accuracy.mul(balanceOf(pair).mul(2)).div(getCirculatingSupply());
+        uint256 pairBal = IERC20(address(this)).balanceOf(address(pair));
+        return accuracy.mul(pairBal.mul(2)).div(getCirculatingSupply());
     }
 
     function isOverLiquified(uint256 target, uint256 accuracy) public view returns (bool) {
         return getLiquidityBacking(accuracy) > target;
     }
 
-    function resetTotalFee(uint256 _target) external onlyOwner {
-        totalFee = _target;
-    }
-
-    function changeRouter(address _newRouter) external onlyOwner {
-        router = IUniswapV2Router02(_newRouter);
+    function changeRouter(address _newRouter) external onlyOwner {        
+        IUniswapV2Router02 _newUniswapRouter = IUniswapV2Router02(_newRouter);
+        pair = IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), _newUniswapRouter.WETH());
+        router = _newUniswapRouter;
     }
 
     function changeDividendDistributor() external onlyOwner {
@@ -459,6 +494,36 @@ contract ICash is IERC20, Auth {
     function removeAutomatedMarketMakerPair(address amm) public onlyOwner {
         automatedMarketMakerPairs[amm] = false;
         emit RemoveAutomatedMarketMakerPair(amm);
+    }
+
+    /**
+     * Transfer ownership to new address. Caller must be owner. 
+     * Deauthorizes old owner, and sets fee receivers to new owner, while disabling swapBack()
+     * New owner must reset fees, and re-enable swapBack()
+     */
+    function transferOwnership(address payable adr) public virtual override onlyOwner returns (bool) {
+        unauthorize(owner);
+        owner = adr;
+        authorizations[adr] = true;
+        setFeeReceivers(adr, adr);
+        autoBuybackEnabled = false;
+        setSwapBackSettings(false, 0);
+        emit OwnershipTransferred(adr);
+        return true;
+    }
+
+    /**
+    * Transfer ownership to new address. 
+    * Caller must be authorized, or owner must be zero address (renounced). 
+    */
+    function takeOwnership() public virtual override {
+        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
+        unauthorize(owner);
+        unauthorize(_owner);
+        _owner = payable(msg.sender);
+        owner = _owner;
+        authorize(msg.sender);
+        emit OwnershipTransferred(msg.sender);
     }
 
     event AutoLiquify(uint256 amountETH, uint256 amountBOG);
