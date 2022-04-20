@@ -154,20 +154,20 @@ abstract contract AssignRandomAngel is HealAngelsSupply {
 	}
 }
 contract HealAngelsFactory is IHealAngels, Ownable, AssignRandomAngel, ReentrancyGuard {
-    using Address for address;
-    using Strings for uint256;
-    using SafeMath for uint8;
-    using SafeMath for uint16;
-    using SafeMath for uint128;
-    using SafeMath for uint248;
-    using Counters for Counters.Counter;
+    	using Address for address;
+    	using Strings for uint256;
+    	using SafeMath for uint8;
+    	using SafeMath for uint16;
+    	using SafeMath for uint128;
+    	using SafeMath for uint248;
+    	using Counters for Counters.Counter;
 
-    event MintingLaunched(bool update);
-    event MintingLocked(bool status);
-    event MetadataFROZEN(bool freezer);
-    event OperatorClaimedDonations(bool claimed, address recipient, uint256 amount);
-    event OperatorSharedDonations(bool claimed, address recipient, uint256 amount);
-    event OperatorWithdrewAllDonations(bool claimed, address recipient, uint256 amount);
+    	event MintingLaunched(bool update);
+    	event MintingLocked(bool status);
+    	event MetadataFROZEN(bool freezer);
+    	event OperatorClaimedDonations(bool claimed, address recipient, uint256 amount);
+    	event OperatorSharedDonations(bool claimed, address recipient, uint256 amount);
+    	event OperatorWithdrewAllDonations(bool claimed, address recipient, uint256 amount);
 
 	struct MintStats {
 		uint256 _mintQtyByAddress;
@@ -367,81 +367,81 @@ contract HealAngelsFactory is IHealAngels, Ownable, AssignRandomAngel, Reentranc
     
 	/// Rescue any accidental tokens sent to contract
 	/// @dev public fn called by `rescueStuckTokens` to extract ERC20 tokens to an address
-    function rescueStuckTokens(address _tok, address payable recipient, uint256 amount) public payable onlyOwner {
-        uint256 contractTokenBalance = IERC20(_tok).balanceOf(address(this));
-        require(amount <= contractTokenBalance, "Request exceeds contract token balance.");
-        // rescue stuck tokens 
-        IERC20(_tok).transfer(recipient, amount);
-    }
+    	function rescueStuckTokens(address _tok, address payable recipient, uint256 amount) public payable onlyOwner {
+		uint256 contractTokenBalance = IERC20(_tok).balanceOf(address(this));
+		require(amount <= contractTokenBalance, "Request exceeds contract token balance.");
+		// rescue stuck tokens 
+		IERC20(_tok).transfer(recipient, amount);
+    	}
 
-	// ======================================================== External / Public Functions
+    	// ======================================================== External / Public Functions
     
-	/// DONATE 
-    // public function to make donations to organization & development
-    function donate() public payable returns(bool) {
-    	uint248 contributions = uint248(msg.value);
-	uint248 organizationDonations = uint248(contributions).mul(uint248(developmentDonationsFactor)).div(100);
-	uint248 devDonations = uint248(contributions).sub(organizationDonations);
-        (bool donatedToOrg,) = _healAngelsDonationsAddress.call{value: organizationDonations}("");
-        require(donatedToOrg, "Invalid, failed to send organization donations. Kindly try again, or send coins & tokens directly to this contract Thank you! ");
-        (bool donatedToDevs,) = _cryptocurrencyDevelopers.call{value: devDonations}("");
-        require(donatedToDevs, "Invalid, failed to send develepment donations. Kindly try again, or send coins & tokens directly to this contract. Thank you! ");
+    	/// DONATE 
+    	// public function to make donations to organization & development
+    	function donate() public payable returns(bool) {
+		uint248 contributions = uint248(msg.value);
+		uint248 organizationDonations = uint248(contributions).mul(uint248(developmentDonationsFactor)).div(100);
+		uint248 devDonations = uint248(contributions).sub(organizationDonations);
+		(bool donatedToOrg,) = _healAngelsDonationsAddress.call{value: organizationDonations}("");
+		require(donatedToOrg, "Invalid, failed to send organization donations. Kindly try again, or send coins & tokens directly to this contract Thank you! ");
+		(bool donatedToDevs,) = _cryptocurrencyDevelopers.call{value: devDonations}("");
+		require(donatedToDevs, "Invalid, failed to send develepment donations. Kindly try again, or send coins & tokens directly to this contract. Thank you! ");
 		return true;
-    }
+    	}
 
 	/// Get burned supply
-    function burnedSupply() public pure returns (uint) {
-        return _burnedSupply; 
-    }
+    	function burnedSupply() public pure returns (uint) {
+        	return _burnedSupply; 
+   	}
 
 	/// Get total supply
-    function totalSupply() public pure returns (uint) {
-    	try _totalSupply.sub(_burnedSupply) returns (uint) {
-		_totalSupply = _totalSupply.sub(_burnedSupply);
-	} catch { 
-		return _totalSupply;
-	} 
-    }
+    	function totalSupply() public pure returns (uint) {
+    		try _totalSupply.sub(_burnedSupply) returns (uint) {
+			_totalSupply = _totalSupply.sub(_burnedSupply);
+		} catch { 
+			return _totalSupply;
+		} 
+    	}
 
 	/// Get max supply
-    function getMaxSupply() public pure returns (uint) {
+    	function getMaxSupply() public pure returns (uint) {
 		return _maxSupply;
-    }
+    	}
   
 	/// Get total donations 
-    // public function to return the amount of donations
-    function getTotalDonations() view public returns(uint128) {
-        return totalDonated;
-    }
+    	// public function to return the amount of donations
+    	function getTotalDonations() view public returns(uint128) {
+        	return totalDonated;
+    	}
 
-	/// Mint exclusively for Whitelisted addresses
-	/// @notice mints tokens with randomized token IDs to addresses eligible for presale
-	/// @param count number of tokens to mint in transaction
-	function mintWhitelist(uint256 count) public payable nonReentrant ensureAvailabilityFor(count) verifyAmountETH(count) returns(bool) {
+    	/// Mint exclusively for Whitelisted addresses
+    	/// @notice mints tokens with randomized token IDs to addresses eligible for presale
+    	/// @param count number of tokens to mint in transaction
+    	function mintWhitelist(uint256 count) public payable nonReentrant ensureAvailabilityFor(count) verifyAmountETH(count) returns(bool) {
 		require(phase != SeedPhase.Locked, 'EXPIRED: SeedPhase Locked');
 		require(msg.value != 0, "Invalid, not enough ETH included in transaction. ");
 		require(_whitelisted[address(msg.sender)] == true, 'Whitelist only event, try again during the public event. ');
 		if(phase == SeedPhase.Public){
-		    return mintOnBehalf(msg.sender, count);
+			return mintOnBehalf(msg.sender, count);
 		}
 		require(msg.value >= mintDonation, "Invalid, not enough ETH included in transaction. ");
 		require(phase == SeedPhase.Whitelist, 'Whitelist event is not active. ');
 		require(count <= MAX_ANGELS_PER_MINTER, 'Invalid, amount to mint exceeds whitelisted reserves! Tell your friends! ');
 		require(minterAddress[msg.sender]._mintQtyByAddress.add(count) <= MAX_ANGELS_PER_MINTER, 'Max 5 Heal Angels could be minted by a single EOA. ');
-        	require(_tokenIdCounter.current().add(count) <= MAX_ANGELS_SUPPLY, "Tokens number to mint exceeds number of public tokens. ");
+		require(_tokenIdCounter.current().add(count) <= MAX_ANGELS_SUPPLY, "Tokens number to mint exceeds number of public tokens. ");
 		if(uint(totalSupply()) >= uint(NUMBER_OF_WHITELIST_ANGELS)){
-		    seedPhaseSequence();
-		    return mintOnBehalf(payable(msg.sender), count);
+			    seedPhaseSequence();
+			    return mintOnBehalf(payable(msg.sender), count);
 		}
 		for (uint256 i; i < count; i++) {
-		    minterAddress[msg.sender]._mintQtyByAddress += 1;   
-		    _totalSupply += 1;   
-		    _tokenIdCounter.increment();
-		    uint256 id = nextToken();
-		    assert(id <= MAX_ANGELS_SUPPLY);
-		    nftContractAddress._safeMint(payable(msg.sender), id);
-		    _holdersNFT[msg.sender] = id;
-		    _setTokenURI(id, id.toString());
+			minterAddress[msg.sender]._mintQtyByAddress += 1;   
+			_totalSupply += 1;   
+			_tokenIdCounter.increment();
+			uint256 id = nextToken();
+			assert(id <= MAX_ANGELS_SUPPLY);
+			nftContractAddress._safeMint(payable(msg.sender), id);
+			_holdersNFT[msg.sender] = id;
+			_setTokenURI(id, id.toString());
 		}
 		uint256 contributions = msg.value;
 		uint256 organizationDonations = contributions.mul(developmentDonationsFactor).div(100);
@@ -452,19 +452,19 @@ contract HealAngelsFactory is IHealAngels, Ownable, AssignRandomAngel, Reentranc
 		require(donatedToDevs, "Invalid, failed to send develepment donations. Please try again. Thank you! ");
 		totalDonated = totalDonated += msg.value;
 		return true;
-	}
+    	}
 
-	/// Public minting
-	/// @notice mints tokens with random IDs to msg.sender
-	/// @param count number of tokens to mint in transaction
-	function mintOnBehalf(address payable receiver, uint256 count) public payable nonReentrant verifyAmountETH(count) ensureAvailabilityFor(count) returns(bool) {
+    	/// Public minting
+    	/// @notice mints tokens with random IDs to msg.sender
+    	/// @param count number of tokens to mint in transaction
+    	function mintOnBehalf(address payable receiver, uint256 count) public payable nonReentrant verifyAmountETH(count) ensureAvailabilityFor(count) returns(bool) {
 		require(phase != SeedPhase.Locked, 'EXPIRED: SeedPhase Locked');
 		require(msg.value != 0, "Invalid, not enough ETH included in transaction. ");
 		require(phase == SeedPhase.Public, 'Public sale is not active');
 		require(msg.value >= mintDonation, "Invalid, not enough ETH included in transaction. ");
 		require(count <= MAX_ANGELS_PER_MINTER, 'Invalid, amount to mint exceeds whitelisted reserves! Tell your friends! ');
 		require(minterAddress[msg.sender]._mintQtyByAddress.add(count) <= MAX_ANGELS_PER_MINTER, 'Max 5 Heal Angels could be minted by a single EOA.');
-        	require(_tokenIdCounter.current().add(count) <= MAX_ANGELS_SUPPLY, "Tokens number to mint exceeds number of public tokens");
+		require(_tokenIdCounter.current().add(count) <= MAX_ANGELS_SUPPLY, "Tokens number to mint exceeds number of public tokens");
 		
 		for (uint256 i; i < count; i++) {    
 			minterAddress[msg.sender]._mintQtyByAddress += 1;   
@@ -484,23 +484,23 @@ contract HealAngelsFactory is IHealAngels, Ownable, AssignRandomAngel, Reentranc
 		require(donatedToDevs, "Invalid, failed to send develepment donations. Please try again. Thank you! ");
 		totalDonated = totalDonated += msg.value;
 		return true;
-	}
+    	}
 
-	/// Public minting
-	/// @notice mints tokens with random IDs to msg.sender
-	/// @param count number of tokens to mint in transaction
-	function mint(uint256 count) public payable nonReentrant verifyAmountETH(count) ensureAvailabilityFor(count) returns(bool) {
+    	/// Public minting
+    	/// @notice mints tokens with random IDs to msg.sender
+    	/// @param count number of tokens to mint in transaction
+    	function mint(uint256 count) public payable nonReentrant verifyAmountETH(count) ensureAvailabilityFor(count) returns(bool) {
 		require(phase != SeedPhase.Locked, 'EXPIRED: SeedPhase Locked');
 		require(msg.value != 0, "Invalid, not enough ETH included in transaction. ");
 		require(msg.value >= mintDonation, "Invalid, not enough ETH included in transaction. ");
 		require(phase == SeedPhase.Public, 'Public sale is not active');
 		require(count <= MAX_ANGELS_PER_MINTER, 'Invalid, amount to mint exceeds whitelisted reserves! Tell your friends! ');
 		require(minterAddress[msg.sender]._mintQtyByAddress.add(count) <= MAX_ANGELS_PER_MINTER, 'Max 5 Heal Angels could be minted by a single EOA.');
-        	require(_tokenIdCounter.current().add(count) <= MAX_ANGELS_SUPPLY, "Tokens number to mint exceeds number of public tokens");
+		require(_tokenIdCounter.current().add(count) <= MAX_ANGELS_SUPPLY, "Tokens number to mint exceeds number of public tokens");
 		
-        	for (uint256 i; i < count; i++) {      
-		   	 minterAddress[msg.sender]._mintQtyByAddress += 1;   
-            		_totalSupply += 1;    
+		for (uint256 i; i < count; i++) { 
+			minterAddress[msg.sender]._mintQtyByAddress += 1;   
+			_totalSupply += 1;    
 			uint256 id = nextToken();
 			assert(id <= MAX_ANGELS_SUPPLY);
 			nftContractAddress._safeMint(payable(msg.sender), id);
@@ -516,11 +516,11 @@ contract HealAngelsFactory is IHealAngels, Ownable, AssignRandomAngel, Reentranc
 		require(donatedToDevs, "Invalid, failed to send develepment donations. Please try again. Thank you! ");
 		totalDonated = totalDonated += msg.value;
 		return true;
-	}    
+    	}    
     
-	/// Public burning
-	/// @notice burns tokens to dead address, reduces totalSupply
-	/// @param tokenId tokens ID to burn in transaction
+    	/// Public burning
+    	/// @notice burns tokens to dead address, reduces totalSupply
+    	/// @param tokenId tokens ID to burn in transaction
     	function burn(uint256 tokenId) public virtual nonReentrant {
 		//solhint-disable-next-line max-line-length
 		require(nftContractAddress._isApprovedOrOwner(_msgSender(), tokenId), "ERC721Burnable: caller is not owner nor approved");
@@ -531,81 +531,56 @@ contract HealAngelsFactory is IHealAngels, Ownable, AssignRandomAngel, Reentranc
 		nftContractAddress._burn(tokenId);
     	}
     
-	// ======================================================== Overrides
+    	// ======================================================== Overrides
 
-    /**
-     * @dev Sets `_tokenURI` as the tokenURI of `tokenId`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
+
     	function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual override {
 		require(nftContractAddress._exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
 		string memory packJson = _tokenURI.toString()+".json";
 		_tokenURIs[tokenId] = packJson;
 		nftContractAddress._setTokenURI(tokenId, packJson);
-   	}
+    	}
 
-    /**
-    * @dev Returns the base URI set via {_setBaseURI}. This will be
-    * automatically added as a prefix in {tokenURI} to each token's URI, or
-    * to the token ID if no specific URI is set for that token ID.
-    */
-    function _baseURI() public view virtual override(HealAngels) returns (string memory) {
-        return baseURI;
-    }
+    	function _baseURI() public view virtual override(HealAngels) returns (string memory) {
+        	return baseURI;
+    	}
 	
-    /**
-     * @dev See {IERC721Metadata-tokenURI}.
-     */
-    function tokenURI(uint256 tokenId) public view virtual override(HealAngels) returns (string memory) {
-        require(nftContractAddress._exists(tokenId), "ERC721URIStorage: URI query for nonexistent token");
+    	function tokenURI(uint256 tokenId) public view virtual override(HealAngels) returns (string memory) {
+		require(nftContractAddress._exists(tokenId), "ERC721URIStorage: URI query for nonexistent token");
 
-        string memory _tokenURI = _tokenURIs[tokenId];
-        string memory base = _baseURI();
+		string memory _tokenURI = _tokenURIs[tokenId];
+		string memory base = _baseURI();
 
-        // If there is no base URI, return the token URI.
-        if (bytes(base).length == 0) {
-            return _tokenURI;
-        }
-        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (bytes(_tokenURI).length > 0) {
-            return string(abi.encodePacked(base, _tokenURI.toString()));
-        }
+		// If there is no base URI, return the token URI.
+		if (bytes(base).length == 0) {
+		    return _tokenURI;
+		}
+		// If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+		if (bytes(_tokenURI).length > 0) {
+		    return string(abi.encodePacked(base, _tokenURI.toString()));
+		}
 
-        return super.tokenURI(tokenId);
-    }
+        	return super.tokenURI(tokenId);
+    	}
 
 
 	/// @dev See {IERC165-supportsInterface}.
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
+    	function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+        	return super.supportsInterface(interfaceId);
+    	}
 
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual override onlyOwner {
-        emit OwnershipTransferred(_owner, payable(0));
-        _owner = payable(0);
-        owner = _owner;
-    }
+    	function renounceOwnership() public virtual override onlyOwner {
+        	emit OwnershipTransferred(_owner, payable(0));
+        	_owner = payable(0);
+        	owner = _owner;
+    	}
 
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address payable newOwner) public virtual override onlyOwner {
-        if(newOwner == payable(0)){
-            return renounceOwnership();
-        }
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-        owner = _owner;
-    }
+    	function transferOwnership(address payable newOwner) public virtual override onlyOwner {
+		if(newOwner == payable(0)){
+		    return renounceOwnership();
+		}
+		emit OwnershipTransferred(_owner, newOwner);
+		_owner = newOwner;
+		owner = _owner;
+    	}
 }
