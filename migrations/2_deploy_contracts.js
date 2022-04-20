@@ -1,4 +1,5 @@
-const ICash = artifacts.require("ICash");
+const HealAngels = artifacts.require("HealAngelsFactory");
+
 module.exports = async function (deployer) {
-  await deployer.deploy(ICash);
- };
+  await deployer.deploy(HealAngels);
+};
