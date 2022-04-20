@@ -8,6 +8,7 @@ https://t.me/cryptocurrencydevs
  If you found this repository useful, I will leave my ETH address below for any readers who would like to donate some ether to help me fund this research & future xAssets experimental smart contracts. We are a small team, and with your help we can continue to grow. 
 
  Here is my ethereum address. An ethereum address is safe to use for Polygon, or Ethereum, or Binance smart chain, any address beginning with 0x and which is 42 characters ranging from a-f and 0-9 will work on any ethereum virtual machine compatible network. 
+ 
  Donation Public Wallet: ```0x972c56de17466958891BeDE00Fe68d24eAb8c2C4``` 
  
 # Disclaimer
