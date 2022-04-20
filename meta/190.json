@@ -1,0 +1,23 @@
+{
+  "name": "Heal Angels #190",
+  "description": "Healers represent the individuals in different professions who practice the art of healing. For example, Doctor & Nurses, Firefighters and Farmers.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/190.png",
+  "dna": "65c34108e74893acc8c578404494b53354d55da9",
+  "edition": 190,
+  "date": 1648472311642,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "bg2"
+    },
+    {
+      "trait_type": "Face",
+      "value": "Dark Blonde Hair"
+    },
+    {
+      "trait_type": "Shirt",
+      "value": "Male Doctor With Mask"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

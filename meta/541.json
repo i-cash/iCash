@@ -1,0 +1,27 @@
+{
+  "name": "Heal Angels #541",
+  "description": "Givers represent those who are selfless, and tend to provide support to others with no strings attached.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/541.png",
+  "dna": "d1a3e309c47bc9da71fc329e2c153bab9cd16c15",
+  "edition": 541,
+  "date": 1647963957227,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "bg2"
+    },
+    {
+      "trait_type": "Face",
+      "value": "Light Blonde Hair"
+    },
+    {
+      "trait_type": "Shirt",
+      "value": "Turtleneck Green"
+    },
+    {
+      "trait_type": "Giver",
+      "value": "Multicoloured Fascia Sash"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

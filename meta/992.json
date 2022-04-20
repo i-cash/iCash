@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #992",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/992.png",
+  "dna": "f0c2f1142adacea9a8baba852ee642fc48dbb7dc",
+  "edition": 992,
+  "date": 1648052190715,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Austin Hilton"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Heal Angels #201",
+  "description": "Healers represent the individuals in different professions who practice the art of healing. For example, Doctor & Nurses, Firefighters and Farmers.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/201.png",
+  "dna": "28d3520397c435d23de7cf6b1c8220ed6a65a551",
+  "edition": 201,
+  "date": 1648032152793,
+  "attributes": [
+    {
+      "trait_type": "Healer",
+      "value": "Bill Gates"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #981",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/981.png",
+  "dna": "944792f52c2dd0f61f334ee8694a48b2fb311822",
+  "edition": 981,
+  "date": 1648014455352,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Shaquille O'Neal"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

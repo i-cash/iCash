@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #1000",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/1000.png",
+  "dna": "16f28c70825c82875797e1e123219d87d6841780",
+  "edition": 1000,
+  "date": 1648059757963,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Elon Musk"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

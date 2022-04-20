@@ -1,0 +1,31 @@
+{
+  "name": "Heal Angels #701",
+  "description": "Patrons represent those who are selfless, and tend to provide support to others with no strings attached.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/701.png",
+  "dna": "865b37216f9e4324b8147e46a99fe2bf5754e5e6",
+  "edition": 701,
+  "date": 1647963563835,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "bg1"
+    },
+    {
+      "trait_type": "Face",
+      "value": "Light Brown Hair"
+    },
+    {
+      "trait_type": "Shirt",
+      "value": "Suit Violet"
+    },
+    {
+      "trait_type": "Hat",
+      "value": "Violet Beanie"
+    },
+    {
+      "trait_type": "Patron",
+      "value": "Wreath"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

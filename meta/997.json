@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #997",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/997.png",
+  "dna": "283180863bb25c2c47edb369c140d167e653bd0b",
+  "edition": 997,
+  "date": 1648057193526,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Crypto Bitlord"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

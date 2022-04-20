@@ -1,0 +1,15 @@
+{
+  "name": "Heal Angels #207",
+  "description": "Healers represent the individuals in different professions who practice the art of healing. For example, Doctor & Nurses, Firefighters and Farmers.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/207.png",
+  "dna": "b5e36eb376128109d69147ea5e1d49c1e89b0b55",
+  "edition": 207,
+  "date": 1648072752532,
+  "attributes": [
+    {
+      "trait_type": "Healer",
+      "value": "Florence Nightingale"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

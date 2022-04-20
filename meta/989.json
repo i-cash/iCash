@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #989",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/989.png",
+  "dna": "f7a333851f7dd5938ab9031de6756d5582feff53",
+  "edition": 989,
+  "date": 1648047209030,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Volodymyr Zelenskyy"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

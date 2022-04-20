@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #982",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/982.png",
+  "dna": "def2c2f6ad5fe97828cddc193279333c55cea378",
+  "edition": 982,
+  "date": 1648018597428,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Eric Cryptoman"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

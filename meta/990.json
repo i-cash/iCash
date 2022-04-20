@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #990",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/990.png",
+  "dna": "0d397e0c4cdf527a9fccbbe0374b876115b98a0f",
+  "edition": 990,
+  "date": 1648048163315,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Will Smith"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

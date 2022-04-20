@@ -1,0 +1,15 @@
+{
+  "name": "Heal Angels #203",
+  "description": "Healers represent the individuals in different professions who practice the art of healing. For example, Doctor & Nurses, Firefighters and Farmers.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/203.png",
+  "dna": "5e91bbd5dd4dd9b908d5522c063c9e67b6e16aaa",
+  "edition": 203,
+  "date": 1648037858939,
+  "attributes": [
+    {
+      "trait_type": "Healer",
+      "value": "Orio Palmer"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

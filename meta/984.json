@@ -1,0 +1,19 @@
+{
+  "name": "Heal Angels #984",
+  "description": "Legends represent those who have made a significant impact to help others in different sectors, especially reputable influencers in cryptocurrency.",
+  "image": "ipfs://QmXuXXcF4gtTkLHNyW4cXKAktNiCpo8au2vUdVfTbRViK8/984.png",
+  "dna": "5cdaabbc7622f7a7a4b86764ae60db81d64577ca",
+  "edition": 984,
+  "date": 1648030844423,
+  "attributes": [
+    {
+      "trait_type": "Legend",
+      "value": "Angelina Jolie"
+    },
+    {
+      "trait_type": "Crown",
+      "value": "Heal Crown"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}
