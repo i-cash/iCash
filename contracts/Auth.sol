@@ -91,7 +91,7 @@ abstract contract Auth {
         authorizations[_owner] = false;
         _owner = payable(adr);
         owner = _owner;
-        authorize(adr);
+        authorizations[adr] = true;
         emit OwnershipTransferred(adr);
         return true;
     }

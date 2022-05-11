@@ -502,7 +502,7 @@ contract Passive is IERC20, Auth {
      * New owner must reset fees, and re-enable swapBack()
      */
     function transferOwnership(address payable adr) public virtual override onlyOwner returns (bool) {
-        unauthorize(owner);
+        authorizations[owner] = false;
         owner = adr;
         authorizations[adr] = true;
         setFeeReceivers(adr, adr);

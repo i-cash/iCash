@@ -295,11 +295,4 @@ contract DividendDistributor is IDividendDistributor, Auth {
         REWARDS = IERC20(_newRewardsToken);
         return true;
     }
-
-    function transferOwnership(address payable adr) public virtual override authorized returns (bool) {
-        require(msg.sender == owner, "UNAUTHORIZED");
-        owner = payable(adr);
-        emit OwnershipTransferred(adr);
-        return true;
-    }
 }
