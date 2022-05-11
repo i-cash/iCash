@@ -1,4 +1,4 @@
-const ICash = artifacts.require("ICash");
+const Passive = artifacts.require("Passive");
 module.exports = async function (deployer) {
-  await deployer.deploy(ICash);
+  await deployer.deploy(Passive);
  };
