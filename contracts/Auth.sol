@@ -77,8 +77,8 @@ abstract contract Auth {
     function renounceOwnership() public virtual onlyOwner {
         require(isOwner(msg.sender), "Unauthorized!");
         emit OwnershipTransferred(address(0));
-        unauthorize(owner);
-        unauthorize(_owner);
+        authorizations[owner] = false;
+        authorizations[_owner] = false;
         _owner = address(0);
         owner = _owner;
     }
@@ -87,26 +87,13 @@ abstract contract Auth {
      * Transfer ownership to new address. Caller must be owner. Leaves old owner authorized
      */
     function transferOwnership(address payable adr) public virtual onlyOwner returns (bool) {
-        unauthorize(owner);
-        unauthorize(_owner);
+        authorizations[owner] = false;
+        authorizations[_owner] = false;
         _owner = payable(adr);
         owner = _owner;
         authorize(adr);
         emit OwnershipTransferred(adr);
         return true;
-    }    
-    
-    /**
-     * Transfer ownership to new address. Caller must be owner. Leaves old owner authorized
-     */
-    function takeOwnership() public virtual {
-        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
-        unauthorize(owner);
-        unauthorize(_owner);
-        _owner = payable(msg.sender);
-        owner = _owner;
-        authorize(msg.sender);
-        emit OwnershipTransferred(msg.sender);
     }
 
     event OwnershipTransferred(address owner);

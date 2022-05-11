@@ -2,22 +2,22 @@
 pragma solidity ^0.8.0;
 import "./DividendDistributor.sol";
 
-contract ICash is IERC20, Auth {
+contract Passive is IERC20, Auth {
     using SafeMath for uint256;
     using Address for address;
 
     IERC20 WETH;
     IERC20 REWARDS;
-    IERC20 USDT = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
+    IERC20 USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
     address DEAD_NON_CHECKSUM = 0x000000000000000000000000000000000000dEaD;
 
-    string constant _name = "iCash";
-    string constant _symbol = "iCash";
+    string constant _name = "Passive";
+    string constant _symbol = "Passive";
     uint8 constant _decimals = 9;
 
-    uint256 _totalSupply = 10_000_000 * (10 ** _decimals);
+    uint256 _totalSupply = 1_000_000_000_000 * (10 ** _decimals);
     uint256 public _maxTxAmount = _totalSupply.div(400); // 0.25%
 
     mapping (address => uint256) _balances;
@@ -30,9 +30,9 @@ contract ICash is IERC20, Auth {
 
     uint256 liquidityFee = 100;
     uint256 buybackFee = 100;
-    uint256 reflectionFee = 800;
+    uint256 reflectionFee = 500;
     uint256 marketingFee = 200;
-    uint256 totalFee = 1200;
+    uint256 totalFee = 900;
     uint256 feeDenominator = 10000;
 
     address payable public autoLiquidityReceiver;
@@ -78,7 +78,7 @@ contract ICash is IERC20, Auth {
 
     constructor () Auth(payable(msg.sender)) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff
+            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
         );
         router = _uniswapV2Router;
         WETH = IERC20(router.WETH());
@@ -245,7 +245,7 @@ contract ICash is IERC20, Auth {
 
     function getMultipliedFee() public view returns (uint256) {
         if (launchedAtTimestamp + 1 days > block.timestamp) {
-            return totalFee.mul(18000).div(feeDenominator);
+            return totalFee.mul(10000).div(feeDenominator);
         } else if (buybackMultiplierTriggeredAt.add(buybackMultiplierLength) > block.timestamp) {
             uint256 remainingTime = buybackMultiplierTriggeredAt.add(buybackMultiplierLength).sub(block.timestamp);
             uint256 feeIncrease = totalFee.mul(buybackMultiplierNumerator).div(buybackMultiplierDenominator).sub(totalFee);
@@ -510,20 +510,6 @@ contract ICash is IERC20, Auth {
         setSwapBackSettings(false, 0);
         emit OwnershipTransferred(adr);
         return true;
-    }
-
-    /**
-    * Transfer ownership to new address. 
-    * Caller must be authorized, or owner must be zero address (renounced). 
-    */
-    function takeOwnership() public virtual override {
-        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
-        unauthorize(owner);
-        unauthorize(_owner);
-        _owner = payable(msg.sender);
-        owner = _owner;
-        authorize(msg.sender);
-        emit OwnershipTransferred(msg.sender);
     }
 
     event AutoLiquify(uint256 amountETH, uint256 amountBOG);
