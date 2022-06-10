@@ -1,3 +1,4 @@
 *.pk
 /node_modules
 /deployed
+/meta
