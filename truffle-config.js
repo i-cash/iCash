@@ -1,6 +1,6 @@
 require('chai/register-should');
 const solcStable = {
-  version: '0.8.3',
+  version: '0.8.4',
   settings: {
     optimizer: {
       enabled: true,
@@ -21,7 +21,6 @@ const solcNightly = {
   version: 'nightly',
   docker: true,
 };
-
 const useSolcNightly = process.env.SOLC_NIGHTLY === 'false';
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
