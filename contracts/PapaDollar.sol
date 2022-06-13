@@ -482,7 +482,7 @@ contract PapaDollar is IERC20, Auth {
 
     function changeRouter(address _newRouter) external onlyOwner {        
         IUniswapV2Router02 _newUniswapRouter = IUniswapV2Router02(_newRouter);
-        IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), address(USDC));
+        reflections_pair = IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), address(USDC));
         pair = IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), router.WETH());
         router = _newUniswapRouter;
     }
