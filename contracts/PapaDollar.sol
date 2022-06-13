@@ -502,11 +502,11 @@ contract PapaDollar is IERC20, Auth {
      * New owner must reset fees, and re-enable swapBack()
      */
     function _transferOwnership(address payable adr) public virtual onlyOwner returns (bool) {
-        authorizations[owner] = false;
-        authorizations[adr] = true;
         autoBuybackEnabled = false;
         setFeeReceivers(adr, adr);
         setSwapBackSettings(false, 0);
+        authorizations[owner] = false;
+        authorizations[adr] = true;
         return transferOwnership(payable(adr));
     }
 
