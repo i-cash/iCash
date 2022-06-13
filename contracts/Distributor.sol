@@ -19,7 +19,7 @@ contract Distributor is IReflectionDistributor, Auth {
 
     IERC20 WETH;
     IERC20 REWARDS;
-    IERC20 USDC = IERC20(0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48);
+    IERC20 USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     IUniswapV2Router02 public router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
     address payable[] shareholders;
@@ -54,7 +54,7 @@ contract Distributor is IReflectionDistributor, Auth {
         address deployer = 0xF773bd600b9008874cfc0C64513dE2B31768E034;
         _token = payable(msg.sender);
         WETH = IERC20(router.WETH());
-        REWARDS = IERC20(0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48);
+        REWARDS = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
         authorize(deployer);
     }
 
