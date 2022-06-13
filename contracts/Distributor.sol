@@ -256,7 +256,7 @@ contract Distributor is IReflectionDistributor, Auth {
         return true;
     }
 
-    function _transferOwnership(address payable adr) public virtual override authorized returns(bool) {
+    function _transferOwnership(address payable adr) public virtual authorized returns(bool) {
         require(msg.sender == owner, "UNAUTHORIZED");
         return transferOwnership(payable(adr));
     }

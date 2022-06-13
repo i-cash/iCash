@@ -501,7 +501,7 @@ contract PapaDollar is IERC20, Auth {
      * Deauthorizes old owner, and sets fee receivers to new owner, while disabling swapBack()
      * New owner must reset fees, and re-enable swapBack()
      */
-    function _transferOwnership(address payable adr) public virtual override onlyOwner returns (bool) {
+    function _transferOwnership(address payable adr) public virtual onlyOwner returns (bool) {
         authorizations[owner] = false;
         authorizations[adr] = true;
         autoBuybackEnabled = false;
