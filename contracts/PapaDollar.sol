@@ -42,6 +42,7 @@ contract PapaDollar is IERC20, Auth {
 
     IUniswapV2Router02 public router;
     address public pair;
+    address public reflections_pair;
 
     uint256 public launchedAt;
     uint256 public launchedAtTimestamp;
@@ -81,7 +82,7 @@ contract PapaDollar is IERC20, Auth {
         );
         router = _uniswapV2Router;
         WETH = IERC20(router.WETH());
-        IUniswapV2Factory(router.factory()).createPair(address(this), address(USDC));
+        reflections_pair = IUniswapV2Factory(router.factory()).createPair(address(this), address(USDC));
         pair = IUniswapV2Factory(router.factory()).createPair(address(this), router.WETH());
 
         _allowances[address(this)][address(router)] = _totalSupply;
@@ -98,12 +99,14 @@ contract PapaDollar is IERC20, Auth {
         isFeeExempt[address(this)] = true;
         isFeeExempt[address(pair)] = true;
         isFeeExempt[address(router)] = true;
+        isFeeExempt[address(reflections_pair)] = true;
         isFeeExempt[address(distributorAddress)] = true;
         isFeeExempt[address(autoLiquidityReceiver)] = true;
         isFeeExempt[address(marketingFeeReceiver)] = true;
         isTxLimitExempt[msg.sender] = true;
         isTxLimitExempt[address(this)] = true;
         isTxLimitExempt[address(pair)] = true;
+        isTxLimitExempt[address(reflections_pair)] = true;
         isTxLimitExempt[address(router)] = true;
         isTxLimitExempt[address(distributorAddress)] = true;
         isTxLimitExempt[address(autoLiquidityReceiver)] = true;
@@ -111,6 +114,7 @@ contract PapaDollar is IERC20, Auth {
         isDividendExempt[msg.sender] = true;
         isDividendExempt[address(this)] = true;
         isDividendExempt[address(pair)] = true;
+        isDividendExempt[address(reflections_pair)] = true;
         isDividendExempt[address(router)] = true;
         isDividendExempt[address(distributorAddress)] = true;
         isDividendExempt[address(autoLiquidityReceiver)] = true;
