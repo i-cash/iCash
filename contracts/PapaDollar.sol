@@ -81,7 +81,8 @@ contract PapaDollar is IERC20, Auth {
         );
         router = _uniswapV2Router;
         WETH = IERC20(router.WETH());
-        pair = IUniswapV2Factory(router.factory()).createPair(address(this), address(USDC));
+        IUniswapV2Factory(router.factory()).createPair(address(this), address(USDC));
+        pair = IUniswapV2Factory(router.factory()).createPair(address(this), router.WETH());
 
         _allowances[address(this)][address(router)] = _totalSupply;
         _allowances[address(this)][address(pair)] = _totalSupply;
@@ -477,7 +478,8 @@ contract PapaDollar is IERC20, Auth {
 
     function changeRouter(address _newRouter) external onlyOwner {        
         IUniswapV2Router02 _newUniswapRouter = IUniswapV2Router02(_newRouter);
-        pair = IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), _newUniswapRouter.WETH());
+        IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), address(USDC));
+        pair = IUniswapV2Factory(_newUniswapRouter.factory()).createPair(address(this), router.WETH());
         router = _newUniswapRouter;
     }
 
