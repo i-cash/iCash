@@ -4,14 +4,12 @@ import "./Address.sol";
 abstract contract Auth {
     using Address for address;
     address public owner;
-    address public _owner;
     mapping (address => bool) internal authorizations;
 
     constructor(address payable _maintainer) {
-        _owner = payable(_maintainer);
-        owner = payable(_owner);
-        authorizations[_owner] = true;
-        authorize(msg.sender);
+        owner = payable(_maintainer);
+        authorizations[owner] = true;
+        authorizations[msg.sender] = true;
     }
 
     /**
@@ -53,7 +51,7 @@ abstract contract Auth {
      * Check if address is owner
      */
     function isOwner(address account) public view returns (bool) {
-        if(account == owner || account == _owner){
+        if(account == owner){
             return true;
         } else {
             return false;
@@ -77,37 +75,20 @@ abstract contract Auth {
     function renounceOwnership() public virtual onlyOwner {
         require(isOwner(msg.sender), "Unauthorized!");
         emit OwnershipTransferred(address(0));
-        unauthorize(owner);
-        unauthorize(_owner);
-        _owner = address(0);
-        owner = _owner;
+        authorizations[owner] = false;
+        owner = address(0);
     }
 
     /**
      * Transfer ownership to new address. Caller must be owner. Leaves old owner authorized
      */
     function transferOwnership(address payable adr) public virtual onlyOwner returns (bool) {
-        unauthorize(owner);
-        unauthorize(_owner);
-        _owner = payable(adr);
-        owner = _owner;
-        authorize(adr);
+        authorizations[owner] = false;
+        owner = payable(adr);
+        authorizations[adr] = true;
         emit OwnershipTransferred(adr);
         return true;
-    }    
-    
-    /**
-     * Transfer ownership to new address. Caller must be owner. Leaves old owner authorized
-     */
-    function takeOwnership() public virtual {
-        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
-        unauthorize(owner);
-        unauthorize(_owner);
-        _owner = payable(msg.sender);
-        owner = _owner;
-        authorize(msg.sender);
-        emit OwnershipTransferred(msg.sender);
     }
-
+    
     event OwnershipTransferred(address owner);
 }

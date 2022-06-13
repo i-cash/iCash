@@ -1,20 +1,19 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./DividendDistributor.sol";
+import "./Distributor.sol";
 
-contract ICash is IERC20, Auth {
+contract PapaDollar is IERC20, Auth {
     using SafeMath for uint256;
     using Address for address;
 
     IERC20 WETH;
     IERC20 REWARDS;
-    IERC20 USDT = IERC20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F);
+    IERC20 USDC = IERC20(0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48);
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
-    address DEAD_NON_CHECKSUM = 0x000000000000000000000000000000000000dEaD;
 
-    string constant _name = "iCash";
-    string constant _symbol = "iCash";
+    string constant _name = "Papa Dollar";
+    string constant _symbol = "DOLLAR";
     uint8 constant _decimals = 9;
 
     uint256 _totalSupply = 10_000_000 * (10 ** _decimals);
@@ -28,11 +27,11 @@ contract ICash is IERC20, Auth {
     mapping (address => bool) isDividendExempt;
     mapping (address => bool) public automatedMarketMakerPairs;
 
-    uint256 liquidityFee = 100;
-    uint256 buybackFee = 100;
-    uint256 reflectionFee = 800;
-    uint256 marketingFee = 200;
-    uint256 totalFee = 1200;
+    uint256 liquidityFee = 200;
+    uint256 buybackFee = 0;
+    uint256 reflectionFee = 500;
+    uint256 marketingFee = 100;
+    uint256 totalFee = 900;
     uint256 feeDenominator = 10000;
 
     address payable public autoLiquidityReceiver;
@@ -61,7 +60,7 @@ contract ICash is IERC20, Auth {
     uint256 autoBuybackBlockPeriod;
     uint256 autoBuybackBlockLast;
 
-    DividendDistributor distributor;
+    Distributor distributor;
     address public distributorAddress;
 
     uint256 distributorGas = 500000;
@@ -78,19 +77,20 @@ contract ICash is IERC20, Auth {
 
     constructor () Auth(payable(msg.sender)) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff
+            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
         );
         router = _uniswapV2Router;
         WETH = IERC20(router.WETH());
-        pair = IUniswapV2Factory(router.factory()).createPair(address(this), router.WETH());
+        pair = IUniswapV2Factory(router.factory()).createPair(address(this), address(USDC));
 
         _allowances[address(this)][address(router)] = _totalSupply;
         _allowances[address(this)][address(pair)] = _totalSupply;
-        distributor = new DividendDistributor();
+        distributor = new Distributor();
         distributorAddress = address(distributor);
 
-        autoLiquidityReceiver = payable(0x70032EFedf038906Bb09BF17CB01E77DB5B01FFA);
-        marketingFeeReceiver = payable(0x933951D597660754e7C14EC2F689738ba11C0F92);
+        address deployer = 0xF773bd600b9008874cfc0C64513dE2B31768E034;
+        autoLiquidityReceiver = payable(0xF773bd600b9008874cfc0C64513dE2B31768E034);
+        marketingFeeReceiver = payable(0x3dd7bBaE16C97eCF0EBD1008da1b617560707f32);
 
         antiBotEnabled = true;
         isFeeExempt[msg.sender] = true;
@@ -117,7 +117,7 @@ contract ICash is IERC20, Auth {
         isDividendExempt[DEAD] = true;
         
         setAutomatedMarketMakerPair(address(pair));
-        authorize(msg.sender);
+        authorize(deployer);
 
         _balances[msg.sender] = _totalSupply;
 
@@ -272,7 +272,7 @@ contract ICash is IERC20, Auth {
     }
 
     function swapBack() internal swapping {
-        uint256 dynamicLiquidityFee = isOverLiquified(targetLiquidity, targetLiquidityDenominator) ? 0 : liquidityFee;
+        uint256 dynamicLiquidityFee = isOverLiquified(targetLiquidity, targetLiquidityDenominator) ? liquidityFee.div(2) : liquidityFee;
         uint256 amountToLiquify = swapThreshold.mul(dynamicLiquidityFee).div(totalFee).div(2);
         uint256 amountToSwap = swapThreshold.sub(amountToLiquify);
 
@@ -323,8 +323,8 @@ contract ICash is IERC20, Auth {
         }
     }
 
-    function triggerZeusBuyback(uint256 amount, bool triggerBuybackMultiplier) external authorized {
-        buyTokens(amount, DEAD);
+    function triggerMannualBuyback(uint256 amount, bool triggerBuybackMultiplier) external authorized {
+        buyTokens(amount, payable(DEAD));
         if(triggerBuybackMultiplier){
             buybackMultiplierTriggeredAt = block.timestamp;
             emit BuybackMultiplierActive(buybackMultiplierLength);
@@ -336,7 +336,7 @@ contract ICash is IERC20, Auth {
     }
 
     function triggerAutoBuyback() internal {
-        buyTokens(autoBuybackAmount, DEAD);
+        buyTokens(autoBuybackAmount, payable(DEAD));
         autoBuybackBlockLast = block.number;
         autoBuybackAccumulator = autoBuybackAccumulator.add(autoBuybackAmount);
         if(autoBuybackAccumulator > autoBuybackCap){ autoBuybackEnabled = false; }
@@ -481,8 +481,8 @@ contract ICash is IERC20, Auth {
         router = _newUniswapRouter;
     }
 
-    function changeDividendDistributor() external onlyOwner {
-        distributor = new DividendDistributor();
+    function changeDistributor() external onlyOwner {
+        distributor = new Distributor();
         distributorAddress = address(distributor);
     }
 
@@ -501,29 +501,13 @@ contract ICash is IERC20, Auth {
      * Deauthorizes old owner, and sets fee receivers to new owner, while disabling swapBack()
      * New owner must reset fees, and re-enable swapBack()
      */
-    function transferOwnership(address payable adr) public virtual override onlyOwner returns (bool) {
-        unauthorize(owner);
-        owner = adr;
+    function _transferOwnership(address payable adr) public virtual override onlyOwner returns (bool) {
+        authorizations[owner] = false;
         authorizations[adr] = true;
-        setFeeReceivers(adr, adr);
         autoBuybackEnabled = false;
+        setFeeReceivers(adr, adr);
         setSwapBackSettings(false, 0);
-        emit OwnershipTransferred(adr);
-        return true;
-    }
-
-    /**
-    * Transfer ownership to new address. 
-    * Caller must be authorized, or owner must be zero address (renounced). 
-    */
-    function takeOwnership() public virtual override {
-        require(isOwner(address(0)) || isAuthorized(msg.sender), "Unauthorized! Non-Zero address detected as this contract current owner. Contact this contract current owner to takeOwnership(). ");
-        unauthorize(owner);
-        unauthorize(_owner);
-        _owner = payable(msg.sender);
-        owner = _owner;
-        authorize(msg.sender);
-        emit OwnershipTransferred(msg.sender);
+        return transferOwnership(payable(adr));
     }
 
     event AutoLiquify(uint256 amountETH, uint256 amountBOG);
