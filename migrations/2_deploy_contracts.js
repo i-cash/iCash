@@ -1,4 +1,4 @@
-const ICash = artifacts.require("ICash");
+const PAPA = artifacts.require("PapaDollar");
 module.exports = async function (deployer) {
-  await deployer.deploy(ICash);
+  await deployer.deploy(PAPA);
  };
