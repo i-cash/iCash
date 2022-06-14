@@ -1,3 +1,5 @@
 /deployed
 *.pk
 /node_modules
+poly.*
+poly.pk
