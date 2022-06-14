@@ -368,7 +368,7 @@ contract Incubator is IDistro, Auth {
     }
 
     // Update reward variables of the given pool to be up-to-date.
-    function updatePool(uint256 _pool, address payable sender) public override {
+    function updatePool(uint256 _pool, address payable sender) internal virtual {
         PoolIntel storage pool = poolIntel[_pool];
         ReflectionInfo storage stacker = reflectionInfo[_pool][address(sender)];
         IERC20 _tok = pool.stackingToken;
