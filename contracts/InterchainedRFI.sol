@@ -560,7 +560,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-contract InterchainedRFI is Context, IERC20, Ownable {
+contract Interchained is Context, IERC20, Ownable {
     using Address for address;
 
     mapping(address => uint256) private _rOwned;
@@ -600,7 +600,7 @@ contract InterchainedRFI is Context, IERC20, Ownable {
     uint256 public _marketingFee;
 
     string private constant _name = "Interchained RFI";
-    string private constant _symbol = "intRFI";
+    string private constant _symbol = "INTRFI";
     uint8  private constant _decimals = 9;
 
     address payable public marketingWallet;
