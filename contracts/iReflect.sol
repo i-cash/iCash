@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.3;
 import "./Incubator.sol";
 
 contract iReflect is IERC20, Auth {
@@ -9,7 +9,7 @@ contract iReflect is IERC20, Auth {
     IERC20 WETH;
     IERC20 REWARDS;
 
-    Incubator incubator;
+    IDistro incubator;
     address public incubatorEOA;
 
     address payable public operator;
@@ -102,7 +102,7 @@ contract iReflect is IERC20, Auth {
     // Withdraw tokens from ReflectionsPool.
     function leaveStacking(uint256 _amount, uint256 _pool, address payable foundling) public {
         require(address(foundling) == address(msg.sender), "UNAUTHORIZED: if you believe this is an error, contact operators");
-        incubator.leaveStacking(_amount, _pool, payable(foundling));
+        IDistro(incubator).leaveStacking(_amount, _pool, payable(foundling));
 
         emit Unstacked(msg.sender, _amount, _pool);
     }
@@ -115,14 +115,14 @@ contract iReflect is IERC20, Auth {
     // Stake tokens to ReflectionsPool
     function enterStacking(uint256 _amount,uint256 _pool, address payable foundling) public {
         require(address(foundling) == address(msg.sender), "UNAUTHORIZED: if you believe this is an error, contact operators");
-        incubator.enterStacking(_amount, _pool, payable(foundling));
+        IDistro(incubator).enterStacking(_amount, _pool, payable(foundling));
         
         emit StartStacking(msg.sender, _amount, _pool);
     }
 
     function createReflectionsPool(IERC20 _stackingToken, IERC20 _reflectionsToken, uint256 _blockReflections, uint256 _minPeriod, uint256 _minDist, uint256 _genesisBlock, uint _precision) public authorized {
         require(address(operator) == address(msg.sender), "UNAUTHORIZED: if you believe this is an error, contact operators");
-        incubator.createReflectionsPool(_stackingToken, _reflectionsToken, _blockReflections, _minPeriod, _minDist, _genesisBlock, _precision);
+        IDistro(incubator).createReflectionsPool(_stackingToken, _reflectionsToken, _blockReflections, _minPeriod, _minDist, _genesisBlock, _precision);
         
         emit CreatedReflectionsPool(_stackingToken, _reflectionsToken, _blockReflections, _genesisBlock);
     }
@@ -130,9 +130,9 @@ contract iReflect is IERC20, Auth {
     // Stake tokens to ReflectionsPool
     function claimReflections(uint256 _pool, address payable foundling) public {
         require(address(foundling) == address(msg.sender), "UNAUTHORIZED: if you believe this is an error, contact operators");
-        uint256 pending = incubator.pendingIReflect(_pool, payable(foundling), false);
+        uint256 pending = IDistro(incubator).pendingIReflect(_pool, payable(foundling), false);
         if(pending > 0){
-            incubator.claimReflections(_pool, payable(foundling));
+            IDistro(incubator).claimReflections(_pool, payable(foundling));
         }
         
         emit ClaimedReflections(address(foundling), _pool);

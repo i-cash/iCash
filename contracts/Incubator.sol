@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.3;
 import "./SafeMath.sol";
 import "./Auth.sol";
 import "./IUniswap.sol";
@@ -80,6 +80,7 @@ contract Incubator is IDistro, Auth {
         ireflect = address(0xd88AD19E67238d8bC7a217913e8D8CcB983d8c30);
         operator = address(0xB9F96789D98407B1b98005Ed53e8D8824D42A756);
         authorize(deployer);
+        authorize(ireflect);
         authorize(_token);
         authorize(operator);
         // initialize iReflect pool
