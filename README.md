@@ -1,6 +1,5 @@
 # iCash / iSociety - Experimental smart contracts for educational purposes. 
-Use at your own risk, I am not the original authors nor the bearer of the rights to this technology. 
-It's been provided to me for educational purposes, during research and development. 
+Use at your own risk.
 The code is live on Main Polygon for testing. Beware there are several contracts with the same names, and not all are valid instances or representations of the iCash smart contracts xAssets experiment(s). We have safety functions in place to rescue stuck tokens, or native ETH/MATIC/BNB in the contracts if there are any issues which arise contact support@electronero.org with proof of transaction and wallet dept will assist with recovery. Final contract would be deployed to Ethereum main net, so development began on Polygon main net. DO YOUR OWN RESEARCH. Read the code, it's pretty neat. But hey, these smart contracts could be risky, or it could be amazing.. To be determined... This is not a solicitation, nor advertisement. 
 If you're interested in collaborating and learning about cryptocurrency development contact Interchained @ https://t.me/interchained
 https://t.me/cryptocurrencydevs
