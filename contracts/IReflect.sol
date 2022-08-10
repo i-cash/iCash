@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./DividendDistributor.sol";
+import "./Reflections.sol";
 
-contract ICash is IERC20, Auth {
+contract IReflect is IERC20, Auth {
     using SafeMath for uint256;
     using Address for address;
 
@@ -13,8 +13,8 @@ contract ICash is IERC20, Auth {
     address ZERO = 0x0000000000000000000000000000000000000000;
     address DEAD_NON_CHECKSUM = 0x000000000000000000000000000000000000dEaD;
 
-    string constant _name = "iCash";
-    string constant _symbol = "iCash";
+    string constant _name = "iReflect";
+    string constant _symbol = "iReflect";
     uint8 constant _decimals = 9;
 
     uint256 _totalSupply = 10_000_000 * (10 ** _decimals);
