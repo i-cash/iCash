@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 import "./Reflections.sol";
 
-contract IReflect is IERC20, Auth {
+contract IReflect is ERC20, Auth {
     using SafeMath for uint256;
     using Address for address;
 
